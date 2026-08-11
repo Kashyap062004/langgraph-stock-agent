@@ -1,0 +1,14 @@
+langgraph==0.2.60
+langchain==0.3.13
+langchain-groq==0.2.3
+langchain-core==0.3.29
+yfinance==0.2.66
+python-dotenv==1.0.1
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+requests==2.32.3
+langgraph-checkpoint-sqlite==2.0.1
+langgraph-cli[inmem]==0.1.71
+google-auth==2.35.0
+PyJWT==2.9.0

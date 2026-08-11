@@ -1,0 +1,16 @@
+# Environment variables
+.env
+Client/.env
+Server/.env
+
+# SQLite temporary files
+*.db-shm
+*.db-wal
+# Environment variables
+.env
+Client/.env
+Server/.env
+
+# SQLite temporary files
+*.db-shm
+*.db-wal

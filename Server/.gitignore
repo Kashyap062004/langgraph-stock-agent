@@ -1,0 +1,4 @@
+.env
+__pycache__/
+*.env
+vite.env.d.ts
