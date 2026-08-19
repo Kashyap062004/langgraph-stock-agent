@@ -2,3 +2,8 @@ export * from './Header';
 export * from './ChatWindow';
 export * from './Messagebubble';
 export * from './ChatInput';
+export * from './Loginscreen';
+export * from './InsightsPanel'
+export * from './Sidebar';
+export * from './DocumentsPanel';
+export * from './WatchlistPanel';

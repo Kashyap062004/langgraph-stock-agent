@@ -1,3 +1,4 @@
+
 export type MessageRole = 'user' | 'assistant';
 
 export interface ChatMessage {
@@ -35,14 +36,27 @@ export interface MessagesResponseBody {
   thread_id: string;
   messages: HistoryMessage[];
 }
+
 export interface AuthUser {
   sub: string;
   email: string;
   name: string;
-  picture?: string;
+  picture: string | null;
 }
 
 export interface TokenResponseBody {
   access_token: string;
   user: AuthUser;
+}
+
+export interface StockDocument {
+  doc_id: string;
+  filename: string;
+  ticker: string | null;
+  chunk_count: number;
+  uploaded_at: string;
+}
+
+export interface WatchlistResponse {
+  tickers: string[];
 }

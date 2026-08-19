@@ -4,11 +4,13 @@ from langchain_core.messages import BaseMessage
 
 
 class AgentState(TypedDict):
-
     messages: Annotated[List[BaseMessage], add_messages]
 
     ticker_symbol: Optional[str]
 
     tool_results: Optional[dict]
-    
+
+
+    user_id: Optional[str]
+
     next_step: Optional[str]
