@@ -4,7 +4,9 @@ import type {
   ChatResponseBody,
   Conversation,
   MessagesResponseBody,
+  StockDocument,
   TokenResponseBody,
+  WatchlistResponse,
 } from '../types';
 
 const API_BASE_URL: string =
@@ -62,12 +64,15 @@ export async function loginWithGoogle(
   return handleResponse<TokenResponseBody>(res);
 }
 
+
 export async function fetchCurrentUser(): Promise<AuthUser> {
   const res = await fetch(`${API_BASE_URL}/auth/me`, {
     headers: authHeaders(),
   });
   return handleResponse<AuthUser>(res);
 }
+
+
 
 export async function sendChatMessage(
   message: string,
@@ -140,4 +145,65 @@ export async function deleteConversation(threadId: string): Promise<void> {
     headers: authHeaders(),
   });
   await handleResponse<{ thread_id: string; deleted: boolean }>(res);
+}
+
+
+export async function uploadDocument(
+  file: File,
+  ticker: string | undefined
+): Promise<StockDocument> {
+  const formData = new FormData();
+  formData.append('file', file);
+  if (ticker) formData.append('ticker', ticker);
+  const res = await fetch(`${API_BASE_URL}/documents/upload`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: formData,
+  });
+  return handleResponse<StockDocument>(res);
+}
+
+export async function listDocuments(): Promise<StockDocument[]> {
+  const res = await fetch(`${API_BASE_URL}/documents`, {
+    headers: authHeaders(),
+  });
+  return handleResponse<StockDocument[]>(res);
+}
+
+export async function deleteDocument(docId: string): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/documents/${docId}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
+  await handleResponse<{ doc_id: string; deleted: boolean }>(res);
+}
+
+
+
+export async function getWatchlist(): Promise<WatchlistResponse> {
+  const res = await fetch(`${API_BASE_URL}/watchlist`, {
+    headers: authHeaders(),
+  });
+  return handleResponse<WatchlistResponse>(res);
+}
+
+export async function addToWatchlist(
+  ticker: string
+): Promise<WatchlistResponse> {
+  const res = await fetch(`${API_BASE_URL}/watchlist`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ ticker }),
+  });
+  return handleResponse<WatchlistResponse>(res);
+}
+
+export async function removeFromWatchlist(
+  ticker: string
+): Promise<WatchlistResponse> {
+  const res = await fetch(`${API_BASE_URL}/watchlist/${ticker}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
+  return handleResponse<WatchlistResponse>(res);
 }

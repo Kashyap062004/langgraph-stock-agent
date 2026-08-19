@@ -12,3 +12,9 @@ langgraph-checkpoint-sqlite==2.0.1
 langgraph-cli[inmem]==0.1.71
 google-auth==2.35.0
 PyJWT==2.9.0
+chromadb==0.5.23
+langchain-chroma==0.2.0
+langchain-huggingface[full]==0.1.2
+pypdf==5.1.0
+python-multipart==0.0.20
+langchain-community==0.3.13

@@ -1,7 +1,14 @@
-import { TrendingUp, RotateCcw, Circle, PanelLeft, LogOut } from 'lucide-react';
+import {
+  TrendingUp,
+  RotateCcw,
+  Circle,
+  PanelLeft,
+  PanelRight,
+  LogOut,
+} from 'lucide-react';
 import { ThemeToggle } from './Themetoggle';
-import type { Theme } from '../hooks/useTheme';
-import type { AuthUser } from '../types/chat';
+import type { Theme } from '../hooks';
+import type { AuthUser } from '../types';
 
 interface HeaderProps {
   isBackendOnline: boolean | null;
@@ -9,6 +16,7 @@ interface HeaderProps {
   theme: Theme;
   onToggleTheme: () => void;
   onToggleSidebar: () => void;
+  onToggleInsights: () => void;
   user: AuthUser;
   onLogout: () => void;
 }
@@ -19,6 +27,7 @@ export function Header({
   theme,
   onToggleTheme,
   onToggleSidebar,
+  onToggleInsights,
   user,
   onLogout,
 }: HeaderProps) {
@@ -72,6 +81,13 @@ export function Header({
           <span className="hidden sm:inline">New chat</span>
         </button>
         <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+        <button
+          onClick={onToggleInsights}
+          title="Documents & watchlist"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
+        >
+          <PanelRight className="h-4 w-4" />
+        </button>
         <div className="ml-1 flex items-center gap-2 border-l border-slate-200 pl-3 dark:border-white/10">
           {user.picture ? (
             <img

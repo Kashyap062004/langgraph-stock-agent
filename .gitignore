@@ -3,14 +3,20 @@
 Client/.env
 Server/.env
 
-# SQLite temporary files
-*.db-shm
-*.db-wal
-# Environment variables
-.env
-Client/.env
-Server/.env
+# Python virtual environment
+Server/.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
 
 # SQLite temporary files
 *.db-shm
 *.db-wal
+
+# Node
+Client/node_modules/
+Client/dist/
+
+# IDE
+.vscode/

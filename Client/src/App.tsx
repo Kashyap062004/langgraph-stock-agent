@@ -3,11 +3,12 @@ import { Header } from './components/Header';
 import { ChatWindow } from './components/ChatWindow';
 import { ChatInput } from './components/ChatInput';
 import { Sidebar } from './components/Sidebar';
-import { LoginScreen } from './components/Loginscreen';
+import { InsightsPanel } from './components/InsightsPanel';
+import { LoginScreen } from './components';
 import { useChat } from './hooks/useChat';
 import { useTheme } from './hooks/useTheme';
 import { useConversations } from './hooks';
-import { useAuth } from './hooks/useauth';
+import { useAuth } from './hooks';
 
 function AuthenticatedApp({
   user,
@@ -17,6 +18,7 @@ function AuthenticatedApp({
   onLogout: () => void;
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isInsightsOpen, setIsInsightsOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
   const {
@@ -75,6 +77,7 @@ function AuthenticatedApp({
           theme={theme}
           onToggleTheme={toggleTheme}
           onToggleSidebar={() => setIsSidebarOpen((v) => !v)}
+          onToggleInsights={() => setIsInsightsOpen((v) => !v)}
           user={user}
           onLogout={onLogout}
         />
@@ -86,6 +89,11 @@ function AuthenticatedApp({
           disabled={isBackendOnline === false}
         />
       </div>
+
+      <InsightsPanel
+        isOpen={isInsightsOpen}
+        onClose={() => setIsInsightsOpen(false)}
+      />
     </div>
   );
 }
