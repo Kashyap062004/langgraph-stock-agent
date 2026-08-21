@@ -1,6 +1,7 @@
 from typing import Optional
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
@@ -11,6 +12,7 @@ load_dotenv()  # must run before auth.py reads GOOGLE_CLIENT_ID/JWT_SECRET
 
 from graph import graph  # noqa: E402
 import conversations as conv_store  # noqa: E402
+import Reports  # noqa: E402
 from auth import (  # noqa: E402
     get_current_user,
     verify_google_credential,
@@ -82,6 +84,14 @@ class TokenResponse(BaseModel):
     user: UserOut
 
 
+class ReportRequest(BaseModel):
+    content: str   # the assistant message's raw markdown content
+    title: str = "Stock Report"
+
+
+class ReportRequest(BaseModel):
+    content: str   # the assistant message's raw markdown content
+    title: str = "Stock Report"
 # --- Helpers -----------------------------------------------------------
 
 def _reconstruct_visible_messages(raw_messages) -> list[MessageOut]:
@@ -94,6 +104,11 @@ def _reconstruct_visible_messages(raw_messages) -> list[MessageOut]:
         elif isinstance(m, ToolMessage):
             continue
     return visible
+
+
+def _safe_filename(title: str) -> str:
+    cleaned = "".join(c if c.isalnum() or c in " -_" else "" for c in title).strip()
+    return cleaned or "report"
 
 
 # --- Auth endpoints --------------------------------------------------------
@@ -168,6 +183,60 @@ def delete_conversation(thread_id: str, user: dict = Depends(get_current_user)):
     if not deleted:
         raise HTTPException(status_code=404, detail="Conversation not found")
     return {"thread_id": thread_id, "deleted": True}
+
+
+# --- Report endpoints (PDF download / email) -------------------------------
+
+@app.post("/reports/pdf")
+def download_report_pdf(req: ReportRequest, user: dict = Depends(get_current_user)):
+    """
+    Renders the given markdown content as a PDF and returns it directly as
+    the response body with a Content-Disposition header — that header is
+    what makes the browser trigger a native "Save As" download instead of
+    just showing raw bytes (see frontend's downloadReportPdf()).
+    """
+    try:
+        pdf_bytes = Reports.markdown_to_pdf(req.content, title=req.title)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate PDF: {e}")
+
+    filename = _safe_filename(req.title)
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}.pdf"'},
+    )
+
+
+@app.post("/reports/email")
+def email_report(req: ReportRequest, user: dict = Depends(get_current_user)):
+    """
+    Same PDF as above, emailed to the AUTHENTICATED USER'S OWN address
+    (user["email"], from their verified Google profile) — never an address
+    supplied in the request body. Letting the request specify an arbitrary
+    recipient would turn this into an open mail relay anyone with a valid
+    session could point at any address — a real abuse vector worth avoiding.
+    """
+    try:
+        pdf_bytes = Reports.markdown_to_pdf(req.content, title=req.title)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate PDF: {e}")
+
+    filename = _safe_filename(req.title)
+    try:
+        Reports.send_report_email(
+            to_email=user["email"],
+            subject=req.title,
+            pdf_bytes=pdf_bytes,
+            pdf_filename=f"{filename}.pdf",
+        )
+    except RuntimeError as e:
+        # SMTP not configured — a setup problem, not a user error
+        raise HTTPException(status_code=503, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send email: {e}")
+
+    return {"sent": True, "to": user["email"]}
 
 
 # --- Chat endpoint (also scoped to the authenticated user) -----------------

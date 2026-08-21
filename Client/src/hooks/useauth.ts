@@ -21,14 +21,11 @@ export function useAuth() {
     setUser(null);
   }, []);
 
- 
-
   useEffect(() => {
     setUnauthorizedHandler(logout);
     return () => setUnauthorizedHandler(null);
   }, [logout]);
 
- 
   useEffect(() => {
     const stored = localStorage.getItem(TOKEN_KEY);
     if (!stored) {
@@ -44,7 +41,6 @@ export function useAuth() {
       })
       .finally(() => setIsCheckingSession(false));
   }, []);
-
 
   const loginWithGoogleCredential = useCallback(async (credential: string) => {
     const { access_token, user: loggedInUser } =

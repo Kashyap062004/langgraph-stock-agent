@@ -2,6 +2,11 @@
 .env
 Client/.env
 Server/.env
+Server/.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
 
 # SQLite temporary files
 *.db-shm
@@ -14,3 +19,8 @@ Server/.env
 # SQLite temporary files
 *.db-shm
 *.db-wal
+Client/node_modules/
+Client/dist/
+
+# IDE
+.vscode/

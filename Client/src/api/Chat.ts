@@ -93,8 +93,6 @@ export async function checkBackendHealth(): Promise<boolean> {
   }
 }
 
-
-
 export async function listConversations(): Promise<Conversation[]> {
   const res = await fetch(`${API_BASE_URL}/conversations`, {
     headers: authHeaders(),
@@ -140,4 +138,74 @@ export async function deleteConversation(threadId: string): Promise<void> {
     headers: authHeaders(),
   });
   await handleResponse<{ thread_id: string; deleted: boolean }>(res);
+}
+
+/**
+ * Add these two functions to your existing chatApi.ts, alongside your
+ * other API functions. They reuse the same authHeaders()/API_BASE_URL
+ * already defined there — no new setup needed.
+ */
+
+/**
+ * POST /reports/pdf — the backend returns raw PDF bytes with a
+ * Content-Disposition header, not JSON. We read it as a Blob and trigger a
+ * browser download via a temporary <a> element — this is the standard way
+ * to turn a fetch() response into a native "Save As" download, since fetch
+ * has no built-in "save this blob to disk" API.
+ */
+export async function downloadReportPdf(
+  content: string,
+  title: string
+): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/reports/pdf`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ content, title }),
+  });
+
+  if (!res.ok) {
+    let detail = `Request failed with status ${res.status}`;
+    try {
+      const errJson = await res.json();
+      if (errJson?.detail) detail = errJson.detail;
+    } catch {
+      // not JSON — keep the generic message
+    }
+    throw new ApiError(detail, res.status);
+  }
+
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${title || 'report'}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url); // release the blob URL once the download has started
+}
+
+/** POST /reports/email — sends to the logged-in user's own verified email. */
+export async function emailReport(
+  content: string,
+  title: string
+): Promise<{ sent: boolean; to: string }> {
+  const res = await fetch(`${API_BASE_URL}/reports/email`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ content, title }),
+  });
+
+  if (!res.ok) {
+    let detail = `Request failed with status ${res.status}`;
+    try {
+      const errJson = await res.json();
+      if (errJson?.detail) detail = errJson.detail;
+    } catch {
+      // not JSON
+    }
+    throw new ApiError(detail, res.status);
+  }
+
+  return res.json();
 }

@@ -2,6 +2,7 @@ from langchain_core.messages import SystemMessage, AIMessage, ToolMessage
 from state import AgentState
 from llm import llm_with_tools, SYSTEM_PROMPT
 from tools import TOOLS
+from Formatting import normalize_markdown_tables
 
 #  name/tool->function mapping 
 
@@ -25,6 +26,8 @@ def agent_node(state: AgentState) -> dict:
     # so it's never accidentally duplicated as conversation history grows.
     full_messages = [SystemMessage(content=SYSTEM_PROMPT)] + messages
     response = llm_with_tools.invoke(full_messages)
+    if isinstance(response, AIMessage):
+        response.content = normalize_markdown_tables(response.content)
     return {"messages": [response]}
 
 
